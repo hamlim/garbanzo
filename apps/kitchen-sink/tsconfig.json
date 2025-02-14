@@ -10,6 +10,9 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "types": ["react/experimental", "./.wrangler/types/runtime.d.ts"],
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "#utils/*": ["./src/utils/*"]
+    }
   }
 }

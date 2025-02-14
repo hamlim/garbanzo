@@ -1,3 +1,13 @@
 @import "tailwindcss";
 
+/* This kinda sucks */
+/* First source is if the process is running from the root of the repo */
 @source "../node_modules/@local/components";
+/* Second source is if the process is running from the app dir */
+@source "../../../node_modules/@local/components";
+
+@theme {
+  --color-primary: var(--color-emerald-500);
+  --color-secondary: var(--color-blue-500);
+  --color-tertiary: var(--color-purple-500);
+}

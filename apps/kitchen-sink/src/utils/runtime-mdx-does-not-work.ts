@@ -4,7 +4,7 @@ import * as jsxRuntime from "react/jsx-runtime";
 import rehypeMdxCodeProps from "rehype-mdx-code-props";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
-import { remarkMdxFrontmatter } from "remark-mdx-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 
 type Options = {
   content: string;
