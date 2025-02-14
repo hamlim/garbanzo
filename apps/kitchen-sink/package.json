@@ -19,7 +19,7 @@
     "react-server-dom-webpack": "19.0.0",
     "tailwindcss": "4.0.6",
     "waku": "0.21.19",
-    "wrangler": "3.107.2",
+    "wrangler": "3.109.1",
     "@local/components": "workspace:*"
   },
   "imports": {
