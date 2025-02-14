@@ -1,9 +1,6 @@
 {
   "name": "root",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "private": true,
   "devDependencies": {
     "@turbo/gen": "2.3.4",
@@ -27,6 +24,7 @@
   },
   "packageManager": "bun@1.2.0",
   "whare": {
-    "version": "5f2b12b8f2643a26cb155ad6df4507e730df0928"
+    "version": "5f2b12b8f2643a26cb155ad6df4507e730df0928",
+    "ignoreWorkspaces": ["./apps/kitchen-sink"]
   }
 }
