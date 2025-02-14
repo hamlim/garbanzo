@@ -5,6 +5,11 @@ exports[`CLI should parse args 1`] = `
 
 Usage:
   garbanzo init  - Initialize a new Garbanzo project
+    Supported Options:
+      path (required): Either;
+        --path <path> - The path to initialize the project in
+        -p <path> - The path to initialize the project in
+        <path> - The path to initialize the project in
   garbanzo dev   - Start the development server
   garbanzo build - Build the project
   garbanzo help  - Show this help message
