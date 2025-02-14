@@ -4,6 +4,7 @@ import type { PathsForPages } from "waku/router";
 import HomeLayout from "./components/_layout";
 import Root from "./components/_root";
 import HomePage from "./components/home.page";
+import MDXDemoPage from "./components/mdx-demo.page";
 
 const pages = createPages(
   async ({ createPage, createLayout, createRoot, createApi }) => [
@@ -22,6 +23,12 @@ const pages = createPages(
       render: "dynamic",
       path: "/",
       component: HomePage,
+    }),
+
+    createPage({
+      render: "static",
+      path: "/mdx",
+      component: MDXDemoPage,
     }),
 
     // createPage({
