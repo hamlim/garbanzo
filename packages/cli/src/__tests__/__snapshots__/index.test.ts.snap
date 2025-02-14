@@ -1,0 +1,12 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CLI should parse args 1`] = `
+"@garbanzo/cli:
+
+Usage:
+  garbanzo init  - Initialize a new Garbanzo project
+  garbanzo dev   - Start the development server
+  garbanzo build - Build the project
+  garbanzo help  - Show this help message
+"
+`;
