@@ -7,6 +7,9 @@
     "name": "Matt Hamlin",
     "email": "matthewjameshamlin@gmail.com"
   },
+  "bin": {
+    "garbanzo": "./cli.mjs"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/hamlim/garbanzo",
