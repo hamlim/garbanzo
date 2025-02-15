@@ -25,6 +25,6 @@
   "packageManager": "bun@1.2.2",
   "whare": {
     "version": "fc9d966709c528c01306760e7b7ed3c2399087c7",
-    "ignoreWorkspaces": ["./apps/kitchen-sink"]
+    "ignoreWorkspaces": ["./apps/kitchen-sink", "./apps/template"]
   }
 }
