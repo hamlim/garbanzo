@@ -8,7 +8,17 @@ Garbanzo CLI
 bun add @garbanzo/cli -D
 ```
 
-TODO
+### Config (`garbanzo.config.mjs`)
+
+To configure Garbanzo, you can use a `garbanzo.config.mjs`, currently this _must_ be a `.mjs` file using that exact naming convention.
+
+```mjs
+import {defineConfig} from '@garbanzo/cli';
+
+export default defineConfig({
+  // config options here
+});
+```
 
 ## Contributing:
 

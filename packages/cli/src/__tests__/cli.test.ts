@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { CLI, type DefaultOptions, type ParsedArgs } from "../index";
+import { CLI, type DefaultOptions, type ParsedArgs } from "../cli";
 
 class TestLogger {
   logs: Array<any> = [];

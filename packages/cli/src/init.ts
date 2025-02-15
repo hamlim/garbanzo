@@ -1,5 +1,5 @@
 import mri from "mri";
-import { CLI } from ".";
+import { CLI } from "./cli";
 
 let parsedArgs = mri(process.argv.slice(2), {
   alias: {

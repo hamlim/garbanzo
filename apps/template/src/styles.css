@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: var(--color-emerald-500);
+  --color-secondary: var(--color-blue-500);
+  --color-tertiary: var(--color-purple-500);
+}
