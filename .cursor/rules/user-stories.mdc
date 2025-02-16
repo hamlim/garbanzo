@@ -1,0 +1,68 @@
+---
+description: Structure and format for user stories in the project
+globs: docs/user-stories/**/*.md
+---
+<rule>
+name: user_stories_structure
+description: Defines the structure and format for user stories in markdown files
+
+# User Stories Structure
+This rule defines how user stories should be structured and formatted in the project.
+
+## File Location
+User stories are stored in the `docs/user-stories` directory, with the following structure:
+```
+docs/user-stories/
+├── epic-1/
+│   ├── story-1.md
+│   └── story-2.md
+└── epic-2/
+    └── story-3.md
+```
+
+## File Naming Convention
+- Files should be named using kebab-case
+- Format: `{descriptive-name}.md`
+- Example: `search-by-tag.md`, `create-new-post.md`
+
+## Story Template
+Each user story should follow this template:
+
+```markdown
+---
+id: US-{number}
+title: {Short descriptive title}
+status: draft | in-progress | completed
+priority: low | medium | high
+created: {YYYY-MM-DD}
+---
+
+## As a...
+{type of user}
+
+## I want to...
+{clear, concise description of the feature/functionality}
+
+## So that...
+{benefit or value this provides}
+
+## Acceptance Criteria
+- [ ] {criterion 1}
+- [ ] {criterion 2}
+- [ ] {criterion 3}
+
+## Notes
+{Optional: Any additional context, technical notes, or considerations}
+
+## Related
+- {Optional: Links to related stories, issues, or documentation}
+```
+
+## Usage with AI
+When implementing features, you can reference these stories in AI conversations using:
+"Please help me implement the user story in docs/user-stories/{epic}/{story-name}.md"
+
+metadata:
+  priority: high
+  version: 1.0
+</rule> 
