@@ -42,15 +42,46 @@ describe("CLI", () => {
     expect(async () => await cli.run()).toThrowError("Unknown command");
   });
 
-  test("init - throws error on missing path", async () => {
-    let cli = new CLI(
-      // no path provided
-      { _: ["init"] } as ParsedArgs,
-      { logger: testLogger } as DefaultOptions,
-    );
+  describe("init", () => {
+    test("throws error on missing path", async () => {
+      let cli = new CLI(
+        // no path provided
+        { _: ["init"] } as ParsedArgs,
+        { logger: testLogger } as DefaultOptions,
+      );
 
-    expect(async () => await cli.run()).toThrowError(
-      "No path provided, you must provide a path of the directory you want to create the garbanzo app within.",
-    );
+      expect(async () => await cli.run()).toThrowError(
+        "No path provided, you must provide a path of the directory you want to create the garbanzo app within.",
+      );
+    });
+
+    test("throws for existing path", () => {
+      let cli = new CLI(
+        {
+          _: ["init"],
+          path: "./test-dir",
+        } as unknown as ParsedArgs,
+        {
+          logger: testLogger,
+          fileSystem: {
+            exists: async () => true,
+          },
+          nodeOs: {
+            homedir() {
+              return "/home";
+            },
+          },
+          nodeProcess: {
+            cwd() {
+              return "/home";
+            },
+          },
+        } as unknown as DefaultOptions,
+      );
+
+      expect(async () => await cli.run()).toThrowError(
+        "Path /home/test-dir already exists, please provide a different path",
+      );
+    });
   });
 });

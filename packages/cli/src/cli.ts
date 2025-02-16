@@ -1,4 +1,6 @@
+import nodeChildProcess from "node:child_process";
 import {
+  cp,
   exists,
   mkdir,
   readFile,
@@ -7,16 +9,27 @@ import {
   unlink,
   writeFile,
 } from "node:fs/promises";
+import nodeOs from "node:os";
 import nodePath from "node:path";
+import nodeProcess from "node:process";
+import { promisify } from "node:util";
+import { downloadTemplate } from "giget";
+
+let nodeExec = promisify(nodeChildProcess.exec);
 
 export interface FileSystemImpl {
   readFile(path: string): Promise<string>;
   writeFile(path: string, content: string): Promise<void>;
   exists(path: string): Promise<boolean>;
-  mkdir(path: string): Promise<void>;
+  mkdir(path: string, options?: { recursive?: boolean }): Promise<void>;
   readdir(path: string): Promise<string[]>;
   rmdir(path: string): Promise<void>;
   unlink(path: string): Promise<void>;
+  cp(
+    src: string,
+    dest: string,
+    options?: { recursive?: boolean },
+  ): Promise<void>;
 }
 
 type CommandArg = "init" | "dev" | "build" | "help";
@@ -36,10 +49,26 @@ export interface NodePathImpl {
   join(...paths: Array<string>): string;
 }
 
+export interface OsImpl {
+  tmpdir(): string;
+  homedir(): string;
+}
+
+export type ExecImpl = (
+  command: string,
+) => Promise<{ stdout: string; stderr: string }>;
+
+export interface ProcessImpl {
+  cwd(): string;
+}
+
 export interface DefaultOptions {
   fileSystem?: FileSystemImpl;
   logger?: Logger;
   nodePath?: NodePathImpl;
+  nodeOs?: OsImpl;
+  exec?: ExecImpl;
+  nodeProcess?: ProcessImpl;
 }
 
 type RefinedDefaultOptions = Required<DefaultOptions>;
@@ -58,6 +87,13 @@ class InvalidOptionError extends Error {
   }
 }
 
+class FailureError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FailureError";
+  }
+}
+
 let defaultOptions: RefinedDefaultOptions = {
   fileSystem: {
     async readFile(path: string) {
@@ -65,20 +101,29 @@ let defaultOptions: RefinedDefaultOptions = {
     },
     writeFile,
     exists,
-    mkdir,
+    async mkdir(path: string, options?: { recursive?: boolean }) {
+      await mkdir(path, options);
+    },
     readdir,
     rmdir,
     unlink,
+    cp,
   },
   logger: console,
   nodePath,
+  nodeOs,
+  exec: nodeExec,
+  nodeProcess,
 };
 
 export class CLI {
   parsedArgs: ParsedArgs;
   fileSystem: FileSystemImpl;
   nodePath: NodePathImpl;
+  nodeOs: OsImpl;
   logger: Logger;
+  exec: ExecImpl;
+  nodeProcess: ProcessImpl;
 
   constructor(
     parsedArgs: ParsedArgs,
@@ -86,12 +131,18 @@ export class CLI {
       fileSystem = defaultOptions.fileSystem,
       logger = defaultOptions.logger,
       nodePath = defaultOptions.nodePath,
+      nodeOs = defaultOptions.nodeOs,
+      exec = defaultOptions.exec,
+      nodeProcess = defaultOptions.nodeProcess,
     }: DefaultOptions = defaultOptions,
   ) {
     this.parsedArgs = parsedArgs;
     this.fileSystem = fileSystem || defaultOptions.fileSystem;
     this.logger = logger || defaultOptions.logger;
     this.nodePath = nodePath || defaultOptions.nodePath;
+    this.nodeOs = nodeOs || defaultOptions.nodeOs;
+    this.exec = exec || defaultOptions.exec;
+    this.nodeProcess = nodeProcess || defaultOptions.nodeProcess;
   }
 
   async run(): Promise<void> {
@@ -117,11 +168,43 @@ export class CLI {
           );
         }
 
-        let normalizedPath = this.nodePath.join(process.cwd(), path);
+        let normalizedPath = this.nodePath.join(
+          this.nodeProcess.cwd(),
+          path.replace(/^~/, this.nodeOs.homedir()),
+        );
 
-        // TODO: clone repo into normalizedPath
-        // TODO: remove .git
-        // TODO: install deps
+        let exists = await this.fileSystem.exists(normalizedPath);
+        if (exists) {
+          throw new InvalidOptionError(
+            `Path ${normalizedPath} already exists, please provide a different path.`,
+          );
+        }
+
+        try {
+          await downloadTemplate(`github:hamlim/garbanzo/apps/template`, {
+            dir: normalizedPath,
+          });
+
+          await this.exec(
+            [
+              `cd ${normalizedPath}`,
+              `bun install`,
+              `git init`,
+              `git add .`,
+              `git commit -m "Init"`,
+            ].join(" && "),
+          );
+
+          logger.log(`Garbanzo app initialized in ${normalizedPath}`);
+        } catch (e) {
+          throw new FailureError(
+            [
+              `Failed to initialize garbanzo app in ${normalizedPath}`,
+              `Raw error:`,
+              (e as Error).message,
+            ].join("\n"),
+          );
+        }
 
         break;
       }
