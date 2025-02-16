@@ -1,7 +1,7 @@
 {
   "name": "@garbanzo/cli",
   "version": "0.0.1",
-  "description": "TODO",
+  "description": "The Garbanzo CLI",
   "homepage": "TODO",
   "author": {
     "name": "Matt Hamlin",
