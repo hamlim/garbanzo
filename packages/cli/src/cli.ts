@@ -14,6 +14,7 @@ import nodePath from "node:path";
 import nodeProcess from "node:process";
 import { promisify } from "node:util";
 import { downloadTemplate } from "giget";
+import mri from "mri";
 
 let nodeExec = promisify(nodeChildProcess.exec);
 
@@ -258,4 +259,19 @@ export class CLI {
       }
     }
   }
+}
+
+export function init(): void {
+  let parsedArgs = mri(process.argv.slice(2), {
+    alias: {
+      path: ["p"],
+    },
+  });
+
+  let cli = new CLI(parsedArgs);
+
+  cli.run().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
 }

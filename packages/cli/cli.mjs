@@ -1,3 +1,5 @@
 #!/usr/bin/env node
 
-import "./dist/init.js";
+import { init } from "./dist/cli.js";
+
+init();
