@@ -1,7 +1,7 @@
 import nodeChildProcess from "node:child_process";
+import { existsSync } from "node:fs";
 import {
   cp,
-  exists,
   mkdir,
   readFile,
   readdir,
@@ -101,7 +101,9 @@ let defaultOptions: RefinedDefaultOptions = {
       return readFile(path, "utf-8");
     },
     writeFile,
-    exists,
+    exists(path: string) {
+      return Promise.resolve(existsSync(path));
+    },
     async mkdir(path: string, options?: { recursive?: boolean }) {
       await mkdir(path, options);
     },
