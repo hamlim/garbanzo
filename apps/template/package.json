@@ -36,6 +36,6 @@
     "remark-gfm": "4.0.1",
     "remark-mdx-frontmatter": "5.0.0",
     "typescript": "5.7.3",
-    "@garbanzo/cli": "workspace:*"
+    "@garbanzo/cli": "*"
   }
 }
