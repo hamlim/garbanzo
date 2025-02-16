@@ -3,7 +3,7 @@ id: US-001
 title: Manage User Stories in Project
 status: draft
 priority: high
-created: 2024-02-15
+created: 2025-02-15
 ---
 
 ## As a...
