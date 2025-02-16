@@ -57,6 +57,7 @@ export interface OsImpl {
 
 export type ExecImpl = (
   command: string,
+  options?: { cwd?: string },
 ) => Promise<{ stdout: string; stderr: string }>;
 
 export interface ProcessImpl {
@@ -93,6 +94,11 @@ class FailureError extends Error {
     super(message);
     this.name = "FailureError";
   }
+}
+
+async function safely(promise: Promise<any>) {
+  let result = await Promise.allSettled([promise]);
+  return result[0];
 }
 
 let defaultOptions: RefinedDefaultOptions = {
@@ -188,17 +194,48 @@ export class CLI {
             dir: normalizedPath,
           });
 
-          await this.exec(
-            [
-              `cd ${normalizedPath}`,
-              `bun install`,
-              `git init`,
-              `git add .`,
-              `git commit -m "Init"`,
-            ].join(" && "),
+          let accumulatedErrors: Array<Error> = [];
+          let result = await safely(
+            this.exec(`bun i`, { cwd: normalizedPath }),
           );
+          if (result.status === "rejected") {
+            accumulatedErrors.push(result.reason);
+          }
+          result = await safely(this.exec(`git init`, { cwd: normalizedPath }));
+          if (result.status === "rejected") {
+            accumulatedErrors.push(result.reason);
+          }
+          result = await safely(
+            this.exec(`git add .`, { cwd: normalizedPath }),
+          );
+          if (result.status === "rejected") {
+            accumulatedErrors.push(result.reason);
+          }
+          result = await safely(
+            this.exec(`git commit -m "Init"`, { cwd: normalizedPath }),
+          );
+          if (result.status === "rejected") {
+            accumulatedErrors.push(result.reason);
+          }
 
-          logger.log(`Garbanzo app initialized in ${normalizedPath}`);
+          if (accumulatedErrors.length > 0) {
+            throw new FailureError(
+              [
+                `Encountered errors while initializing garbanzo app in ${normalizedPath}`,
+                `Raw errors:`,
+                accumulatedErrors.map((e) => e.message).join("\n"),
+              ].join("\n"),
+            );
+          }
+          logger.log(
+            [
+              `Garbanzo app initialized in ${normalizedPath}!`,
+              "Next steps:",
+              "",
+              ` - cd ${path}`,
+              ` - bun run dev`,
+            ].join("\n"),
+          );
         } catch (e) {
           throw new FailureError(
             [
