@@ -1,4 +1,4 @@
-import nodeChildProcess from "node:child_process";
+import { spawn } from "node:child_process";
 import { readdirSync } from "node:fs";
 import { existsSync } from "node:fs";
 import {
@@ -21,25 +21,14 @@ import { generateEntries } from "./entries-generation.js";
 import { findRoutes } from "./find-routes.js";
 import { type Config, defaultConfig } from "./index.js";
 
-// type PromisifiedExec = (
-//   command: string,
-//   options?: { cwd?: string; stdio?: string | Array<string> },
-// ) => Promise<{ stdout: string; stderr: string }>;
+type SpawnOptions = Parameters<typeof spawn>[2];
 
-let nodeExec /*: PromisifiedExec */ = promisify(nodeChildProcess.exec);
-
-type PromisifiedSpawn = (
+let spawnAsync: (
   command: string,
   args: Array<string>,
-  options: {
-    cwd?: string;
-    stdio?: string | Array<string>;
-    env?: Record<string, string>;
-  },
-) => Promise<{ stdout: string; stderr: string }>;
-
-// @ts-expect-error
-let nodeSpawn: PromisifiedSpawn = promisify(nodeChildProcess.spawn);
+  options: SpawnOptions,
+) => Promise<{ stdout: string; stderr: string; status: number }> =
+  promisify(spawn);
 
 export interface FileSystemImpl {
   readFile(path: string): Promise<string>;
@@ -89,8 +78,7 @@ export interface DefaultOptions {
   logger?: Logger;
   nodePath?: typeof import("node:path");
   nodeOs?: typeof import("node:os");
-  // exec?: typeof nodeExec;
-  spawn?: typeof nodeSpawn;
+  spawn?: typeof spawnAsync;
   nodeProcess?: typeof import("node:process");
 }
 
@@ -143,8 +131,7 @@ let defaultOptions: RefinedDefaultOptions = {
   logger: console,
   nodePath,
   nodeOs,
-  // exec: nodeExec,
-  spawn: nodeSpawn,
+  spawn: spawnAsync,
   nodeProcess,
 };
 
@@ -154,7 +141,6 @@ export class CLI {
   nodePath: RefinedDefaultOptions["nodePath"];
   nodeOs: RefinedDefaultOptions["nodeOs"];
   logger: RefinedDefaultOptions["logger"];
-  // exec: RefinedDefaultOptions["exec"];
   spawn: RefinedDefaultOptions["spawn"];
   nodeProcess: RefinedDefaultOptions["nodeProcess"];
 
@@ -167,7 +153,6 @@ export class CLI {
       logger = defaultOptions.logger,
       nodePath = defaultOptions.nodePath,
       nodeOs = defaultOptions.nodeOs,
-      // exec = defaultOptions.exec,
       spawn = defaultOptions.spawn,
       nodeProcess = defaultOptions.nodeProcess,
     }: DefaultOptions = defaultOptions,
@@ -177,7 +162,6 @@ export class CLI {
     this.logger = logger || defaultOptions.logger;
     this.nodePath = nodePath || defaultOptions.nodePath;
     this.nodeOs = nodeOs || defaultOptions.nodeOs;
-    // this.exec = exec || defaultOptions.exec;
     this.spawn = spawn || defaultOptions.spawn;
     this.nodeProcess = nodeProcess || defaultOptions.nodeProcess;
   }
@@ -197,28 +181,71 @@ export class CLI {
         logger.log("Collecting routes...");
         await this.prepare();
         logger.log("Starting development server...");
-        await this.spawn(`bun`, ["waku", "dev"], {
-          env: {
-            ...process.env,
-            VITE_EXPERIMENTAL_WAKU_ROUTER: "true",
-          },
-          stdio: ["inherit", "inherit", "inherit"],
-          cwd: this.nodeProcess.cwd(),
-        });
+        try {
+          let { status, stderr, stdout } = await this.spawn(
+            `bun`,
+            ["waku", "dev"],
+            {
+              env: {
+                ...process.env,
+                VITE_EXPERIMENTAL_WAKU_ROUTER: "true",
+              },
+              stdio: ["inherit", "inherit", "inherit"],
+              cwd: this.nodeProcess.cwd(),
+            },
+          );
+          if (status !== 0) {
+            throw new FailureError(
+              ["Failed to start development server", `Raw error:`, stderr].join(
+                "\n",
+              ),
+            );
+          }
+          logger.log(stdout);
+        } catch (e) {
+          throw new FailureError(
+            [
+              "Failed to start development server",
+              `Raw error:`,
+              (e as Error).message,
+            ].join("\n"),
+          );
+        }
         break;
       }
       case "build": {
         logger.log("Collecting routes...");
         await this.prepare();
         logger.log("Building project...");
-        await this.spawn(`bun`, ["waku", "build", "--with-cloudflare"], {
-          cwd: this.nodeProcess.cwd(),
-          stdio: ["inherit", "inherit", "inherit"],
-          env: {
-            ...process.env,
-            VITE_EXPERIMENTAL_WAKU_ROUTER: "true",
-          },
-        });
+        try {
+          let { status, stderr, stdout } = await this.spawn(
+            `bun`,
+            ["waku", "build", "--with-cloudflare"],
+            {
+              cwd: this.nodeProcess.cwd(),
+              stdio: ["inherit", "inherit", "inherit"],
+              env: {
+                ...process.env,
+                VITE_EXPERIMENTAL_WAKU_ROUTER: "true",
+              },
+            },
+          );
+          if (status !== 0) {
+            throw new FailureError(
+              ["Failed to build project", `Raw error:`, stderr].join("\n"),
+            );
+          }
+          logger.log(stdout);
+          logger.log("Build successful!");
+        } catch (e) {
+          throw new FailureError(
+            [
+              "Failed to build project",
+              `Raw error:`,
+              (e as Error).message,
+            ].join("\n"),
+          );
+        }
         break;
       }
       case "help": {
