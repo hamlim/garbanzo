@@ -12,12 +12,10 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@tailwindcss/vite": "4.0.6",
     "hono": "4.6.20",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-server-dom-webpack": "19.0.0",
-    "tailwindcss": "4.0.6",
     "waku": "0.21.19",
     "wrangler": "3.109.1",
     "@local/components": "workspace:*"
@@ -26,6 +24,9 @@
     "#utils/*": "./src/utils/*"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "4.0.6",
+    "tailwindcss": "4.0.6",
+    "postcss": "8.5.2",
     "@mdx-js/mdx": "3.1.0",
     "@mdx-js/rollup": "^3.1.0",
     "@types/node": "22.13.0",
