@@ -21,12 +21,25 @@ import { generateEntries } from "./entries-generation.js";
 import { findRoutes } from "./find-routes.js";
 import { type Config, defaultConfig } from "./index.js";
 
-type PromisifiedExec = (
+// type PromisifiedExec = (
+//   command: string,
+//   options?: { cwd?: string; stdio?: string | Array<string> },
+// ) => Promise<{ stdout: string; stderr: string }>;
+
+let nodeExec /*: PromisifiedExec */ = promisify(nodeChildProcess.exec);
+
+type PromisifiedSpawn = (
   command: string,
-  options?: { cwd?: string; stdio?: string | Array<string> },
+  args: Array<string>,
+  options: {
+    cwd?: string;
+    stdio?: string | Array<string>;
+    env?: Record<string, string>;
+  },
 ) => Promise<{ stdout: string; stderr: string }>;
 
-let nodeExec: PromisifiedExec = promisify(nodeChildProcess.exec);
+// @ts-expect-error
+let nodeSpawn: PromisifiedSpawn = promisify(nodeChildProcess.spawn);
 
 export interface FileSystemImpl {
   readFile(path: string): Promise<string>;
@@ -76,7 +89,8 @@ export interface DefaultOptions {
   logger?: Logger;
   nodePath?: typeof import("node:path");
   nodeOs?: typeof import("node:os");
-  exec?: typeof nodeExec;
+  // exec?: typeof nodeExec;
+  spawn?: typeof nodeSpawn;
   nodeProcess?: typeof import("node:process");
 }
 
@@ -129,7 +143,8 @@ let defaultOptions: RefinedDefaultOptions = {
   logger: console,
   nodePath,
   nodeOs,
-  exec: nodeExec,
+  // exec: nodeExec,
+  spawn: nodeSpawn,
   nodeProcess,
 };
 
@@ -139,7 +154,8 @@ export class CLI {
   nodePath: RefinedDefaultOptions["nodePath"];
   nodeOs: RefinedDefaultOptions["nodeOs"];
   logger: RefinedDefaultOptions["logger"];
-  exec: RefinedDefaultOptions["exec"];
+  // exec: RefinedDefaultOptions["exec"];
+  spawn: RefinedDefaultOptions["spawn"];
   nodeProcess: RefinedDefaultOptions["nodeProcess"];
 
   config: Required<Config> | undefined;
@@ -151,7 +167,8 @@ export class CLI {
       logger = defaultOptions.logger,
       nodePath = defaultOptions.nodePath,
       nodeOs = defaultOptions.nodeOs,
-      exec = defaultOptions.exec,
+      // exec = defaultOptions.exec,
+      spawn = defaultOptions.spawn,
       nodeProcess = defaultOptions.nodeProcess,
     }: DefaultOptions = defaultOptions,
   ) {
@@ -160,7 +177,8 @@ export class CLI {
     this.logger = logger || defaultOptions.logger;
     this.nodePath = nodePath || defaultOptions.nodePath;
     this.nodeOs = nodeOs || defaultOptions.nodeOs;
-    this.exec = exec || defaultOptions.exec;
+    // this.exec = exec || defaultOptions.exec;
+    this.spawn = spawn || defaultOptions.spawn;
     this.nodeProcess = nodeProcess || defaultOptions.nodeProcess;
   }
 
@@ -176,22 +194,31 @@ export class CLI {
         break;
       }
       case "dev": {
+        logger.log("Collecting routes...");
         await this.prepare();
-        this.exec(`VITE_EXPERIMENTAL_WAKU_ROUTER=true bun waku dev`, {
+        logger.log("Starting development server...");
+        await this.spawn(`bun`, ["waku", "dev"], {
+          env: {
+            ...process.env,
+            VITE_EXPERIMENTAL_WAKU_ROUTER: "true",
+          },
+          stdio: ["inherit", "inherit", "inherit"],
           cwd: this.nodeProcess.cwd(),
-          stdio: "inherit",
         });
         break;
       }
       case "build": {
+        logger.log("Collecting routes...");
         await this.prepare();
-        this.exec(
-          `VITE_EXPERIMENTAL_WAKU_ROUTER=true bun waku build --with-cloudflare`,
-          {
-            cwd: this.nodeProcess.cwd(),
-            stdio: "inherit",
+        logger.log("Building project...");
+        await this.spawn(`bun`, ["waku", "build", "--with-cloudflare"], {
+          cwd: this.nodeProcess.cwd(),
+          stdio: ["inherit", "inherit", "inherit"],
+          env: {
+            ...process.env,
+            VITE_EXPERIMENTAL_WAKU_ROUTER: "true",
           },
-        );
+        });
         break;
       }
       case "help": {
