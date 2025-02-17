@@ -91,13 +91,13 @@
     },
     "packages/cli": {
       "name": "@garbanzo/cli",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "bin": {
         "garbanzo": "./cli.mjs"
       },
       "dependencies": {
-        "giget": "^1.2.4",
-        "mri": "^1.2.0",
+        "giget": "1.2.4",
+        "mri": "1.2.0",
       },
       "devDependencies": {
         "@garbanzo/types": "workspace:*",
@@ -105,7 +105,7 @@
         "@swc/core": "1.4.2",
         "@types/bun": "1.1.11",
         "hohoro": "0.3.0",
-        "memfs": "^4.17.0",
+        "memfs": "4.17.0",
         "typescript": "5.4.5",
       },
     },
