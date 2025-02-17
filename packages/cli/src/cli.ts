@@ -316,43 +316,16 @@ export class CLI {
       await downloadTemplate(`github:hamlim/garbanzo/apps/template`, {
         dir: normalizedPath,
       });
-
-      let accumulatedErrors: Array<Error> = [];
-      let result = await safely(this.exec(`bun i`, { cwd: normalizedPath }));
-      if (result.status === "rejected") {
-        accumulatedErrors.push(result.reason);
-      }
-      result = await safely(this.exec(`git init`, { cwd: normalizedPath }));
-      if (result.status === "rejected") {
-        accumulatedErrors.push(result.reason);
-      }
-      result = await safely(this.exec(`git add .`, { cwd: normalizedPath }));
-      if (result.status === "rejected") {
-        accumulatedErrors.push(result.reason);
-      }
-      result = await safely(
-        this.exec(`git commit -m "Init"`, { cwd: normalizedPath }),
-      );
-      if (result.status === "rejected") {
-        accumulatedErrors.push(result.reason);
-      }
-
-      if (accumulatedErrors.length > 0) {
-        throw new FailureError(
-          [
-            `Encountered errors while initializing garbanzo app in ${normalizedPath}`,
-            `Raw errors:`,
-            accumulatedErrors.map((e) => e.message).join("\n"),
-          ].join("\n"),
-        );
-      }
       logger.log(
         [
           `Garbanzo app initialized in ${normalizedPath}!`,
           "Next steps:",
           "",
           ` - cd ${path}`,
+          ` - bun i`,
           ` - bun run dev`,
+          "",
+          "Remember to initalize the repo if you want!",
         ].join("\n"),
       );
     } catch (e) {
