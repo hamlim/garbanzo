@@ -35,11 +35,19 @@ export function generateRoutes(
     let { route, kind, type, __name } = routeDefinition;
 
     switch (kind) {
-      case "page": {
+      case "dynamic-page": {
         return [
           `createPage({`,
-          // @TODO: need to support static pages too
           `  render: "dynamic",`,
+          `  path: "${route}",`,
+          `  component: ${__name},`,
+          `}),`,
+        ].join("\n");
+      }
+      case "static-page": {
+        return [
+          `createPage({`,
+          `  render: "static",`,
           `  path: "${route}",`,
           `  component: ${__name},`,
           `}),`,
@@ -56,8 +64,6 @@ export function generateRoutes(
           `    PUT: ${__name},`,
           `    DELETE: ${__name},`,
           `    PATCH: ${__name},`,
-          `    OPTIONS: ${__name},`,
-          `    HEAD: ${__name},`,
           `  },`,
           `}),`,
         ].join("\n");

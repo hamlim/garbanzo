@@ -1,4 +1,4 @@
-export type RouteKind = "page" | "route" | "meta";
+export type RouteKind = "dynamic-page" | "route" | "meta" | "static-page";
 
 export type RouteType =
   // a static segment in the route path

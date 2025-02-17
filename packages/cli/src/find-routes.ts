@@ -54,7 +54,17 @@ export function findRoutes(
   let count = 0;
 
   for (let file of files) {
-    file = file.replace(appPath.replace("./", ""), "");
+    let cleanAppPath = appPath.replace("./", "");
+    if (cleanAppPath.endsWith("/")) {
+      cleanAppPath = cleanAppPath.slice(0, -1);
+    }
+    if (cleanAppPath.startsWith("/")) {
+      cleanAppPath = cleanAppPath.slice(1);
+    }
+    file = file.replace(cleanAppPath, "");
+    if (file.startsWith("/")) {
+      file = file.slice(1);
+    }
     let partialRoute: Partial<RouteDefinition> = {};
 
     partialRoute.filePath = file;
@@ -108,6 +118,7 @@ export function findRoutes(
         break;
       }
       case "page":
+      case "page.static":
       case "route": {
         if (
           routeParentSegment.startsWith("[...") &&
@@ -125,7 +136,10 @@ export function findRoutes(
         }
 
         if (routeBasename === "page") {
-          partialRoute.kind = "page";
+          partialRoute.kind = "dynamic-page";
+          partialRoute.__name = `page${count++}`;
+        } else if (routeBasename === "page.static") {
+          partialRoute.kind = "static-page";
           partialRoute.__name = `page${count++}`;
         } else {
           partialRoute.kind = "route";

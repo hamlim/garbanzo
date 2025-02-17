@@ -4,7 +4,7 @@ import type { PathsForPages } from "waku/router";
 import HomeLayout from "./app/@layout";
 import Root from "./app/@root";
 import { GET as greet } from "./app/api/greet/route";
-import MDXDemoPage from "./app/mdx/page";
+import MDXDemoPage from "./app/mdx/page.static";
 import HomePage from "./app/page";
 
 const pages = createPages(

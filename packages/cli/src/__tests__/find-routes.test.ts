@@ -63,13 +63,68 @@ describe("findRoutes", () => {
           },
           {
             filePath: "dashboard/page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/dashboard",
             type: "static-segment",
           },
           {
             filePath: "page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
+            route: "/",
+            type: "static-segment",
+          },
+        ] as Array<RouteDefinition>
+      ).toSorted(sortRoutes),
+    );
+  });
+
+  test("handles static routes", () => {
+    let fs = makeFS({
+      src: {
+        app: {
+          "page.tsx": "export default function Homepage() {}",
+          dashboard: {
+            "page.tsx": "export default function Dashboard() {}",
+          },
+          blog: {
+            "some-post": {
+              "page.static.tsx": "export default function BlogPost() {}",
+            },
+          },
+          api: {
+            "route.ts": "export default function apiRoute() {}",
+          },
+        },
+      },
+    });
+    let routes = findRoutes("./src/app/", {
+      fs,
+    });
+
+    expect(routes.toSorted(sortRoutes).map(cleanRouteDefinition)).toEqual(
+      (
+        [
+          {
+            filePath: "api/route.ts",
+            kind: "route",
+            route: "/api",
+            type: "static-segment",
+          },
+          {
+            filePath: "dashboard/page.tsx",
+            kind: "dynamic-page",
+            route: "/dashboard",
+            type: "static-segment",
+          },
+          {
+            filePath: "blog/some-post/page.static.tsx",
+            kind: "static-page",
+            route: "/blog/some-post",
+            type: "static-segment",
+          },
+          {
+            filePath: "page.tsx",
+            kind: "dynamic-page",
             route: "/",
             type: "static-segment",
           },
@@ -110,13 +165,13 @@ describe("findRoutes", () => {
           },
           {
             filePath: "dashboard/page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/dashboard",
             type: "static-segment",
           },
           {
             filePath: "page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/",
             type: "static-segment",
           },
@@ -154,13 +209,13 @@ describe("findRoutes", () => {
         [
           {
             filePath: "[...slug]/page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/[...slug]",
             type: "catch-all-segment",
           },
           {
             filePath: "[id]/page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/[id]",
             type: "dynamic-segment",
           },
@@ -172,13 +227,13 @@ describe("findRoutes", () => {
           },
           {
             filePath: "dashboard/page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/dashboard",
             type: "static-segment",
           },
           {
             filePath: "page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/",
             type: "static-segment",
           },
@@ -245,13 +300,13 @@ describe("findRoutes", () => {
           },
           {
             filePath: "dashboard/page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/dashboard",
             type: "static-segment",
           },
           {
             filePath: "page.tsx",
-            kind: "page",
+            kind: "dynamic-page",
             route: "/",
             type: "static-segment",
           },

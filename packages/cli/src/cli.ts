@@ -17,13 +17,13 @@ import { promisify } from "node:util";
 import { downloadTemplate } from "giget";
 import mri from "mri";
 
-import { generateEntries } from "./entries-generation";
-import { findRoutes } from "./find-routes";
-import { type Config, defaultConfig } from "./index";
+import { generateEntries } from "./entries-generation.js";
+import { findRoutes } from "./find-routes.js";
+import { type Config, defaultConfig } from "./index.js";
 
 type PromisifiedExec = (
   command: string,
-  options?: { cwd?: string },
+  options?: { cwd?: string; stdio?: string | Array<string> },
 ) => Promise<{ stdout: string; stderr: string }>;
 
 let nodeExec: PromisifiedExec = promisify(nodeChildProcess.exec);
@@ -179,6 +179,7 @@ export class CLI {
         await this.prepare();
         this.exec(`VITE_EXPERIMENTAL_WAKU_ROUTER=true bun waku dev`, {
           cwd: this.nodeProcess.cwd(),
+          stdio: "inherit",
         });
         break;
       }
@@ -188,6 +189,7 @@ export class CLI {
           `VITE_EXPERIMENTAL_WAKU_ROUTER=true bun waku build --with-cloudflare`,
           {
             cwd: this.nodeProcess.cwd(),
+            stdio: "inherit",
           },
         );
         break;

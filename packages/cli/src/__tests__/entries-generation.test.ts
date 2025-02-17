@@ -25,6 +25,11 @@ let fs = makeFS({
         "@layout.tsx": "export default function Layout() {}",
         "page.tsx": "export default function Dashboard() {}",
       },
+      blog: {
+        "some-post": {
+          "page.static.tsx": "export default function BlogPost() {}",
+        },
+      },
       api: {
         "route.ts": "export default function apiRoute() {}",
       },
@@ -61,9 +66,10 @@ describe("generateImports", () => {
       'import page3 from "./app/[...slug]/page";',
       'import page4 from "./app/[id]/page";',
       'import route5 from "./app/api/route";',
-      'import layout6 from "./app/dashboard/@layout";',
-      'import page7 from "./app/dashboard/page";',
-      'import page8 from "./app/page";',
+      'import page6 from "./app/blog/some-post/page.static";',
+      'import layout7 from "./app/dashboard/@layout";',
+      'import page8 from "./app/dashboard/page";',
+      'import page9 from "./app/page";',
     ]);
   });
 });
@@ -76,10 +82,11 @@ describe("generateRoutes", () => {
       'createRoot({\n  render: "dynamic",\n  component: root2,\n}),',
       'createPage({\n  render: "dynamic",\n  path: "/[...slug]",\n  component: page3,\n}),',
       'createPage({\n  render: "dynamic",\n  path: "/[id]",\n  component: page4,\n}),',
-      'createApi({\n  render: "dynamic",\n  path: "/api",\n  handlers: {\n    GET: route5,\n    POST: route5,\n    PUT: route5,\n    DELETE: route5,\n    PATCH: route5,\n    OPTIONS: route5,\n    HEAD: route5,\n  },\n}),',
-      'createLayout({\n  render: "dynamic",\n  path: "/dashboard",\n  component: layout6,\n}),',
-      'createPage({\n  render: "dynamic",\n  path: "/dashboard",\n  component: page7,\n}),',
-      'createPage({\n  render: "dynamic",\n  path: "/",\n  component: page8,\n}),',
+      'createApi({\n  render: "dynamic",\n  path: "/api",\n  handlers: {\n    GET: route5,\n    POST: route5,\n    PUT: route5,\n    DELETE: route5,\n    PATCH: route5,\n  },\n}),',
+      'createPage({\n  render: "static",\n  path: "/blog/some-post",\n  component: page6,\n}),',
+      'createLayout({\n  render: "dynamic",\n  path: "/dashboard",\n  component: layout7,\n}),',
+      'createPage({\n  render: "dynamic",\n  path: "/dashboard",\n  component: page8,\n}),',
+      'createPage({\n  render: "dynamic",\n  path: "/",\n  component: page9,\n}),',
     ]);
   });
 });
@@ -107,9 +114,10 @@ import root2 from "./app/@root";
 import page3 from "./app/[...slug]/page";
 import page4 from "./app/[id]/page";
 import route5 from "./app/api/route";
-import layout6 from "./app/dashboard/@layout";
-import page7 from "./app/dashboard/page";
-import page8 from "./app/page";
+import page6 from "./app/blog/some-post/page.static";
+import layout7 from "./app/dashboard/@layout";
+import page8 from "./app/dashboard/page";
+import page9 from "./app/page";
 
 let pages = createPages(async ({ createPage, createLayout, createRoot, createApi }) => [
 createLayout({
@@ -141,24 +149,27 @@ createApi({
     PUT: route5,
     DELETE: route5,
     PATCH: route5,
-    OPTIONS: route5,
-    HEAD: route5,
   },
+}),
+createPage({
+  render: "static",
+  path: "/blog/some-post",
+  component: page6,
 }),
 createLayout({
   render: "dynamic",
   path: "/dashboard",
-  component: layout6,
+  component: layout7,
 }),
 createPage({
   render: "dynamic",
   path: "/dashboard",
-  component: page7,
+  component: page8,
 }),
 createPage({
   render: "dynamic",
   path: "/",
-  component: page8,
+  component: page9,
 }),
 ]);
 

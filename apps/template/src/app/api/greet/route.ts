@@ -1,3 +1,3 @@
-export async function GET(request: Request) {
+export default async function handler(request: Request) {
   return new Response("Hello, world!");
 }
