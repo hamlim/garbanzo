@@ -13,7 +13,6 @@ import {
 import nodeOs from "node:os";
 import nodePath from "node:path";
 import nodeProcess from "node:process";
-import { promisify } from "node:util";
 import { downloadTemplate } from "giget";
 import mri from "mri";
 
@@ -23,12 +22,43 @@ import { type Config, defaultConfig } from "./index.js";
 
 type SpawnOptions = Parameters<typeof spawn>[2];
 
-let spawnAsync: (
+function spawnAsync(
   command: string,
   args: Array<string>,
-  options: SpawnOptions,
-) => Promise<{ stdout: string; stderr: string; status: number }> =
-  promisify(spawn);
+  options: SpawnOptions = {},
+): Promise<{ stdout: string; stderr: string; status: number }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      stdio: ["ignore", "pipe", "pipe"],
+      ...options,
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    if (child.stdout) {
+      child.stdout.on("data", (data) => {
+        stdout += data.toString();
+      });
+    }
+
+    if (child.stderr) {
+      child.stderr.on("data", (data) => {
+        stderr += data.toString();
+      });
+    }
+
+    child.on("error", (error) => {
+      console.error("Spawn error:", error);
+      reject(error);
+    });
+
+    child.on("close", (code) => {
+      console.log(`Process exited with code ${code}`);
+      resolve({ stdout, stderr, status: code ?? 0 });
+    });
+  });
+}
 
 export interface FileSystemImpl {
   readFile(path: string): Promise<string>;
@@ -99,15 +129,12 @@ class InvalidOptionError extends Error {
 }
 
 class FailureError extends Error {
+  stdout?: string;
+  stderr?: string;
   constructor(message: string) {
     super(message);
     this.name = "FailureError";
   }
-}
-
-async function safely(promise: Promise<any>) {
-  let result = await Promise.allSettled([promise]);
-  return result[0];
 }
 
 let defaultOptions: RefinedDefaultOptions = {
@@ -195,14 +222,30 @@ export class CLI {
             },
           );
           if (status !== 0) {
-            throw new FailureError(
+            let error = new FailureError(
               ["Failed to start development server", `Raw error:`, stderr].join(
                 "\n",
               ),
             );
+            error.stdout = stdout;
+            error.stderr = stderr;
+            throw error;
           }
           logger.log(stdout);
         } catch (e) {
+          if (e instanceof FailureError) {
+            let errorMessage = e.stderr;
+            if (!errorMessage) {
+              errorMessage = `See above for more details.`;
+            }
+            throw new FailureError(
+              [
+                "Failed to start development server",
+                `Raw error:`,
+                errorMessage,
+              ].join("\n"),
+            );
+          }
           throw new FailureError(
             [
               "Failed to start development server",
@@ -231,13 +274,29 @@ export class CLI {
             },
           );
           if (status !== 0) {
-            throw new FailureError(
-              ["Failed to build project", `Raw error:`, stderr].join("\n"),
+            let error = new FailureError(
+              ["Failed to build project - status", `Raw error:`, stderr].join(
+                "\n",
+              ),
             );
+            error.stdout = stdout;
+            error.stderr = stderr;
+            throw error;
           }
           logger.log(stdout);
           logger.log("Build successful!");
         } catch (e) {
+          if (e instanceof FailureError) {
+            let errorMessage = e.stderr;
+            if (!errorMessage) {
+              errorMessage = `See above for more details.`;
+            }
+            throw new FailureError(
+              ["Failed to build project", `Raw error:`, errorMessage].join(
+                "\n",
+              ),
+            );
+          }
           throw new FailureError(
             [
               "Failed to build project",
