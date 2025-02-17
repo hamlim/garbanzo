@@ -5,9 +5,10 @@ import { createPages } from "waku";
 import type { PathsForPages } from "waku/router";
 
 import layout0 from "./app/@layout";
-import root1 from "./app/@root";
-import page2 from "./app/mdx-demo/page.static";
-import page3 from "./app/page";
+import notFound1 from "./app/@not-found";
+import root2 from "./app/@root";
+import page3 from "./app/mdx-demo/page.static";
+import page4 from "./app/page";
 
 let pages = createPages(async ({ createPage, createLayout, createRoot, createApi }) => [
 createLayout({
@@ -15,19 +16,24 @@ createLayout({
   path: "/",
   component: layout0,
 }),
+createPage({
+  render: "dynamic",
+  path: "/[...path]",
+  component: notFound1,
+}),
 createRoot({
   render: "dynamic",
-  component: root1,
+  component: root2,
 }),
 createPage({
   render: "static",
   path: "/mdx-demo",
-  component: page2,
+  component: page3,
 }),
 createPage({
   render: "dynamic",
   path: "/",
-  component: page3,
+  component: page4,
 }),
 ]);
 

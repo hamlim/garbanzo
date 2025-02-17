@@ -88,13 +88,12 @@ export function generateRoutes(
             ].join("\n");
           }
           case "@not-found": {
-            // @TODO: need to figure out how to handle this
             return [
-              // `createNotFound({`,
-              // `  render: "dynamic",`,
-              // `  component: ${__name},`,
-              // `})`,
-              `// @TODO - unsupported for now`,
+              `createPage({`,
+              `  render: "dynamic",`,
+              `  path: "${route}",`,
+              `  component: ${__name},`,
+              `}),`,
             ].join("\n");
           }
         }

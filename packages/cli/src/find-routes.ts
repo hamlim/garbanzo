@@ -100,12 +100,15 @@ export function findRoutes(
       }
       // Implementation wise - these will be a bit difficult
       // not-found could be a catch all segment
-      // error probably needs to be a layout (or be wrapped within a layout....)
-      // Maybe we don't support error pages? Instead just use error boundaries within layouts?
       case "@not-found": {
         partialRoute.type = "@not-found";
         partialRoute.kind = "meta";
-        partialRoute.route = route;
+        let notFoundRoute = route;
+        if (!notFoundRoute.endsWith("/")) {
+          notFoundRoute = `${notFoundRoute}/`;
+        }
+        notFoundRoute = `${notFoundRoute}[...path]`;
+        partialRoute.route = notFoundRoute;
         partialRoute.__name = `notFound${count++}`;
         break;
       }
@@ -150,6 +153,49 @@ export function findRoutes(
     if (partialRoute.type) {
       routes.push(partialRoute as RouteDefinition);
     }
+  }
+
+  // find duplicate routes
+  let uniqueRoutes = new Map<string, RouteDefinition>();
+  let duplicateRoutes: Array<[RouteDefinition, RouteDefinition]> = [];
+
+  for (let route of routes) {
+    // @root and @layout meta segments don't "take over" actual routes
+    if (route.type === "@root" || route.type === "@layout") {
+      continue;
+    }
+    let normalizedRoute = route.route.replace(
+      /\[\.\.\.[^\].]+\]/g,
+      "<catch-all>",
+    );
+    if (uniqueRoutes.has(normalizedRoute)) {
+      duplicateRoutes.push([
+        // Route that conflicts
+        route,
+        // existing route
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        uniqueRoutes.get(normalizedRoute)!,
+      ]);
+    } else {
+      uniqueRoutes.set(normalizedRoute, route);
+    }
+  }
+
+  if (duplicateRoutes.length > 0) {
+    throw new Error(
+      `Found ${duplicateRoutes.length} duplicate route${duplicateRoutes.length === 1 ? "" : "s"}: \n${duplicateRoutes
+        .map(([newRoute, existingRoute]) => {
+          if (newRoute.type === "@not-found") {
+            return `- ${newRoute.route} (catch-all segment created by @not-found meta segment [${newRoute.filePath}]) conflicts with route ${existingRoute.route} (added by ${existingRoute.type} [${existingRoute.filePath}])`;
+          }
+          if (existingRoute.type === "@not-found") {
+            return `- ${existingRoute.route} (catch-all segment created by @not-found meta segment [${existingRoute.filePath}]) conflicts with route ${newRoute.route} (added by ${newRoute.type} [${newRoute.filePath}])`;
+          }
+          // I don't think we can actually hit this case
+          return `- ${newRoute.route} (added by ${newRoute.type} segment [${newRoute.filePath}]) conflicts with route ${existingRoute.route} (added by ${existingRoute.type} segment [${existingRoute.filePath}])`;
+        })
+        .join("\n")}`,
+    );
   }
 
   return routes;

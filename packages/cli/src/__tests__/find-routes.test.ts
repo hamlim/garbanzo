@@ -276,7 +276,7 @@ describe("findRoutes", () => {
           {
             filePath: "@not-found.tsx",
             kind: "meta",
-            route: "/",
+            route: "/[...path]",
             type: "@not-found",
           },
           {
@@ -311,6 +311,130 @@ describe("findRoutes", () => {
           },
         ] as Array<RouteDefinition>
       ).toSorted(sortRoutes),
+    );
+  });
+
+  test("handles not-found routes", () => {
+    let fs = makeFS({
+      src: {
+        app: {
+          "@root.tsx": "export default function Root() {}",
+          "@layout.tsx": "export default function Layout() {}",
+          "@not-found.tsx": "export default function NotFound() {}",
+          "page.tsx": "export default function Homepage() {}",
+          dashboard: {
+            "@layout.tsx": "export default function Layout() {}",
+            "page.tsx": "export default function Dashboard() {}",
+            "@not-found.tsx": "export default function NotFound() {}",
+          },
+          blog: {
+            "some-page": {
+              "page.tsx": "export default function BlogPost() {}",
+            },
+            "@not-found.tsx": "export default function NotFound() {}",
+          },
+          api: {
+            "route.ts": "export default function apiRoute() {}",
+            "@not-found.tsx": "export default function NotFound() {}",
+          },
+        },
+      },
+    });
+    let routes = findRoutes("./src/app/", {
+      fs,
+    });
+
+    expect(routes.toSorted(sortRoutes).map(cleanRouteDefinition)).toEqual(
+      (
+        [
+          {
+            filePath: "@layout.tsx",
+            kind: "meta",
+            route: "/",
+            type: "@layout",
+          },
+          {
+            filePath: "@root.tsx",
+            kind: "meta",
+            route: "/",
+            type: "@root",
+          },
+          {
+            filePath: "@not-found.tsx",
+            kind: "meta",
+            route: "/[...path]",
+            type: "@not-found",
+          },
+          {
+            filePath: "api/route.ts",
+            kind: "route",
+            route: "/api",
+            type: "static-segment",
+          },
+          {
+            filePath: "api/@not-found.tsx",
+            kind: "meta",
+            route: "/api/[...path]",
+            type: "@not-found",
+          },
+          {
+            filePath: "blog/@not-found.tsx",
+            kind: "meta",
+            route: "/blog/[...path]",
+            type: "@not-found",
+          },
+          {
+            filePath: "blog/some-page/page.tsx",
+            kind: "dynamic-page",
+            route: "/blog/some-/page",
+            type: "static-segment",
+          },
+          {
+            filePath: "dashboard/@layout.tsx",
+            kind: "meta",
+            route: "/dashboard",
+            type: "@layout",
+          },
+          {
+            filePath: "dashboard/page.tsx",
+            kind: "dynamic-page",
+            route: "/dashboard",
+            type: "static-segment",
+          },
+          {
+            filePath: "page.tsx",
+            kind: "dynamic-page",
+            route: "/",
+            type: "static-segment",
+          },
+          {
+            filePath: "dashboard/@not-found.tsx",
+            kind: "meta",
+            route: "/dashboard/[...path]",
+            type: "@not-found",
+          },
+        ] as Array<RouteDefinition>
+      ).toSorted(sortRoutes),
+    );
+  });
+
+  test("reports duplicate routes for conflicting not-found and catch-all segment", () => {
+    let fs = makeFS({
+      src: {
+        app: {
+          "@not-found.tsx": "export default function NotFound() {}",
+          "[...slug]": {
+            "page.tsx": "export default function CatchAll() {}",
+          },
+        },
+      },
+    });
+
+    expect(() => findRoutes("./src/app/", { fs })).toThrowError(
+      [
+        "Found 1 duplicate route: ",
+        "- /[...path] (catch-all segment created by @not-found meta segment [@not-found.tsx]) conflicts with route /[...slug] (added by catch-all-segment [[...slug]/page.tsx])",
+      ].join("\n"),
     );
   });
 });
