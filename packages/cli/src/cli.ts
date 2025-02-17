@@ -367,20 +367,25 @@ export class CLI {
   }
 
   async loadConfig(): Promise<Required<Config>> {
-    if (this.config) {
-      return this.config;
+    if (!this.config) {
+      let userConfig: Partial<Config> = {};
+      try {
+        userConfig = await import(
+          this.nodePath.join(this.nodeProcess.cwd(), "garbanzo.config.mjs")
+        ).then((m) => m.default);
+      } catch (e) {
+        // missing config file, using default config
+        userConfig = {};
+      }
+
+      let config = {
+        ...defaultConfig,
+        ...userConfig,
+      };
+      this.config = config as Required<Config>;
     }
 
-    let userConfig = await import(
-      this.nodePath.join(this.nodeProcess.cwd(), "garbanzo.config.mjs")
-    ).then((m) => m.default);
-
-    let config = {
-      ...defaultConfig,
-      ...userConfig,
-    };
-    this.config = config;
-    return config;
+    return this.config;
   }
 
   // @TODO: think about how we can run this in parallel with the dev server
