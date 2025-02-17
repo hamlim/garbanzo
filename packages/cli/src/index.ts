@@ -6,9 +6,21 @@ export interface Config {
    *
    * @default "./src/app"
    */
-  appDir?: string;
+  appPath?: string;
+
+  /**
+   * The path to the entries file.
+   *
+   * @default "./src/entries.tsx"
+   */
+  entriesPath?: string;
 }
 
+export let defaultConfig: Config = {
+  appPath: "./src/app",
+  entriesPath: "./src/entries.tsx",
+};
+
 export function defineConfig(config: Config): Config {
-  return config;
+  return { ...defaultConfig, ...config };
 }

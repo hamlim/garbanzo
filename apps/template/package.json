@@ -5,8 +5,10 @@
   "private": true,
   "scripts": {
     "build-cf-types": "wrangler types --experimental-include-runtime",
-    "dev": "VITE_EXPERIMENTAL_WAKU_ROUTER=true waku dev",
-    "build": "VITE_EXPERIMENTAL_WAKU_ROUTER=true waku build --with-cloudflare",
+    "original-dev": "VITE_EXPERIMENTAL_WAKU_ROUTER=true waku dev",
+    "dev": "garbanzo dev",
+    "original-build": "VITE_EXPERIMENTAL_WAKU_ROUTER=true waku build --with-cloudflare",
+    "build": "garbanzo build",
     "start": "wrangler dev",
     "predeploy": "bun run build",
     "deploy": "wrangler deploy"
