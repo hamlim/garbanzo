@@ -24,15 +24,12 @@ I can implement consistent layouts, error handling, and special routes across my
   - [ ] Must export a default component that accepts `children` prop
   - [ ] Apply layout to all routes in current directory and subdirectories
   - [ ] Support nested layouts (child layouts wrap content inside parent layouts)
+  - [ ] Support error boundary implementation for route error handling
 - [ ] Support `@root.<extension>` for HTML document structure
   - [ ] Must export a component defining `<html>`, `<head>`, and `<body>` elements
   - [ ] Support meta tags and document-level configuration
   - [ ] Only allow one root file per application
-- [ ] Support `@error.<extension>` for error boundaries
-  - [ ] Must export an error boundary component
-  - [ ] Catch and handle errors from any child routes/components
-  - [ ] Provide error details to the boundary component
-  - [ ] Support nested error boundaries
+  - [ ] Support application-wide error boundary implementation
 - [ ] Support `@not-found.<extension>` for 404 experiences
   - [ ] Handle requests to non-existent routes
   - [ ] Support custom 404 pages at different route segment levels
@@ -47,28 +44,26 @@ Meta route segments provide a powerful way to control application-wide behavior 
 Example structure:
 ```
 app/pages/
-         ├── @root.tsx
-         ├── @layout.tsx
-         ├── @error.tsx
+         ├── @root.tsx          # App shell + global error handling
+         ├── @layout.tsx        # Root layout + error handling
          ├── page.tsx
          ├── dashboard/
-         │   ├── @layout.tsx
-         │   ├── @error.tsx
-         │   └── @not-found.tsx
+         │   ├── @layout.tsx    # Dashboard layout + error handling
+         │   ├── @not-found.tsx
          │   └── page.tsx
          └── settings/
-             └── @layout.tsx
+             ├── @layout.tsx    # Settings layout + error handling
              └── page.tsx
 ```
 
 Each meta segment serves a specific purpose:
-- `page.*`: Application homepage/root route
-- `@layout.*`: Layout wrapper for route segments
-- `@root.*`: HTML document structure
-- `@error.*`: Error boundary for catching errors
+- `page.*`: Standard route segment
+- `@layout.*`: Layout wrapper with error handling capabilities
+- `@root.*`: HTML document structure with global error handling
 - `@not-found.*`: 404 page for unmatched routes
 
 ## Related
 - Links to US-003 (Standard Route Segments)
+- Links to US-006 (Route Error Handling)
 - Will need documentation on the interaction between standard and meta route segments
 - Consider future meta segments for other special cases (loading, authentication, etc.) 

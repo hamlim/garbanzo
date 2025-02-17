@@ -15,10 +15,7 @@ export type RouteType =
   // the root layout for the entire app
   | "@root"
   // the not found page for the route segment
-  | "@not-found"
-  // @TODO: decide if we want to support this or not!
-  // the error page for the route segment
-  | "@error";
+  | "@not-found";
 
 export type RouteDefinition = {
   // the on-disk path to the file for the route
@@ -27,7 +24,6 @@ export type RouteDefinition = {
   // or `page.tsx`
   // or `dashboard/@layout.tsx`
   // or `@root.tsx`
-  // or `foo/@error.tsx`
   // or `@not-found.tsx`
   filePath: string;
   // the URL path for the route
@@ -41,7 +37,7 @@ export type RouteDefinition = {
   kind: RouteKind;
   // The type of the route segment
   // can be named segments (static, dynamic, or catch-all)
-  // or special segments (@layout, @root, @not-found, @error)
+  // or special segments (@layout, @root, @not-found)
   type: RouteType;
   // Automatically generated route segment name
   // used for imports within entries.tsx file

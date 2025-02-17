@@ -8,7 +8,6 @@ import type { RouteDefinition } from "@garbanzo/types";
  * - `@layout.tsx` - Layout (shared wrapper) for the current route path
  * - `@root.tsx` - Root layout (shared wrapper) for the entire app (limit one per app)
  * - `@not-found.tsx` - Not found page for the current route path
- * - `@error.tsx` - Error page for the current route path
  */
 
 export type RequiredFSFeatures = {
@@ -108,13 +107,6 @@ export function findRoutes(
         partialRoute.kind = "meta";
         partialRoute.route = route;
         partialRoute.__name = `notFound${count++}`;
-        break;
-      }
-      case "@error": {
-        partialRoute.type = "@error";
-        partialRoute.kind = "meta";
-        partialRoute.route = route;
-        partialRoute.__name = `error${count++}`;
         break;
       }
       case "page":

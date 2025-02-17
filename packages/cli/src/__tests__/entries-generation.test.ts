@@ -19,7 +19,6 @@ let fs = makeFS({
       "@root.tsx": "export default function Root() {}",
       "@layout.tsx": "export default function Layout() {}",
       "@not-found.tsx": "export default function NotFound() {}",
-      //   "@error.tsx": "export default function Error() {}",
       "page.tsx": "export default function Homepage() {}",
       dashboard: {
         "@layout.tsx": "export default function Layout() {}",
