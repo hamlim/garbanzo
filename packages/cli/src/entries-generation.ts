@@ -64,6 +64,10 @@ export function generateRoutes(
           `    PUT: ${__name},`,
           `    DELETE: ${__name},`,
           `    PATCH: ${__name},`,
+          `    OPTIONS: ${__name},`,
+          `    HEAD: ${__name},`,
+          `    TRACE: ${__name},`,
+          `    CONNECT: ${__name},`,
           `  },`,
           `}),`,
         ].join("\n");
