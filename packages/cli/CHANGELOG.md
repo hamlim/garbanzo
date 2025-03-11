@@ -1,5 +1,9 @@
 ### Unreleased:
 
+### [0.1.2] - March 10th, 2024
+
+- Fix generating imports within `entries.tsx` file not preserving extensions for non-standard files
+
 ### [0.1.1] - February 27th, 2024
 
 - Add support for additional api handler methods (`HEAD`, `OPTIONS`, `TRACE`, and `CONNECT`)

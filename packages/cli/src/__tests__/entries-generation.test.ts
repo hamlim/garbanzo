@@ -71,6 +71,40 @@ describe("generateImports", () => {
       'import page9 from "./app/page";',
     ]);
   });
+
+  test("should preserve non-standard extensions", () => {
+    let nonStandardFs = makeFS({
+      src: {
+        app: {
+          "@root.tsx": "export default function Root() {}",
+          "@layout.tsx": "export default function Layout() {}",
+          "page.static.mdx": "export default function Homepage() {}",
+          dashboard: {
+            "page.foo": "export default function Dashboard() {}",
+          },
+        },
+      },
+    });
+
+    let routes = findRoutes("./src/app/", {
+      fs: nonStandardFs,
+    });
+
+    expect(
+      generateImports(
+        {
+          appPath: "./src/app",
+          routeDefinitions: routes,
+        },
+        { nodePath },
+      ),
+    ).toEqual([
+      'import layout0 from "./app/@layout";',
+      'import root1 from "./app/@root";',
+      'import page2 from "./app/dashboard/page.foo";',
+      'import page3 from "./app/page.static.mdx";',
+    ]);
+  });
 });
 
 describe("generateRoutes", () => {

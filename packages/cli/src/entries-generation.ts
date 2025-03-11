@@ -1,5 +1,10 @@
 import type { RouteDefinition } from "@garbanzo/types";
 
+// All other file types we preserve the extensions for
+function hasStandardExtension(filePath: string): boolean {
+  return [".ts", ".tsx", ".js", ".jsx"].some((ext) => filePath.endsWith(ext));
+}
+
 export function generateImports(
   {
     appPath,
@@ -18,9 +23,12 @@ export function generateImports(
   return routeDefinitions.map((routeDefinition) => {
     let { filePath, __name } = routeDefinition;
 
-    let importPath = filePath
-      // remove extension
-      .replace(nodePath.extname(filePath), "");
+    let importPath = filePath;
+    if (hasStandardExtension(filePath)) {
+      importPath = filePath
+        // remove extension
+        .replace(nodePath.extname(filePath), "");
+    }
 
     importPath = `${appRelativePath}/${importPath}`;
 
