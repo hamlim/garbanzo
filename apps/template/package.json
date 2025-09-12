@@ -12,7 +12,7 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "hono": "4.6.20",
+    "hono": "4.9.7",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-server-dom-webpack": "19.0.0",
