@@ -9,7 +9,7 @@
     "lint": "biome lint"
   },
   "dependencies": {
-    "next": "15.5.27",
+    "next": "15.5.29",
     "@local/components": "workspace:*"
   },
   "devDependencies": {
